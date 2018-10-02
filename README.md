@@ -1,18 +1,20 @@
 
-# Option A
-## gaps in data shown as dotted lines
+# Option C
+## datapoints denoted by dots; gaps in data shown as dotted lines
 
 ---
 
 **PROS:**
 - missing data clearly differentiated.
+- data points and mouseover tooltips make it clear metric counts are available
 
 **CONS:**
-- data points with missing data the month before and after are 'hidden' (e.g. May 2014).
+- the lighter shading still overemphasizes missing data (data points with missing data the month before and after are less obvious).
 
 ---
 
 **Features:**
+- dots/circles denote actual datapoints, mouseover shows tooltip
 - gaps in data shown with dotted line
 - mini 'brush' chart shows the context of the data in focus in the main chart
 - x-axis zooming and panning is limited to the range of available data

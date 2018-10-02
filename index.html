@@ -121,7 +121,7 @@
 	pointer-events: all;
 }
 
-#metric-modal .metric-chart rect.pane:active, {
+#metric-modal .metric-chart rect.pane:active {
 	cursor: move; /* fallback if grab cursor is unsupported */
 	cursor: grabbing;
 }
@@ -153,7 +153,40 @@
 	font-weight: bold;
 }
 
+/* circle style */
+#metric-modal .metric-chart .dot {
+	fill: white;
+	stroke: #00AA8D; /* default, changed in each theme */
+	stroke-width: 1.5px;
+	clip-path: url(#clip);
+	cursor: default;
+	transition: stroke-width 0.06s ease-in;
+	transition: stroke 0.06s ease-in;
 }
+
+#metric-modal .metric-chart .dot:hover {
+	stroke: #00997e;
+	stroke-width: 6px;
+	transition: stroke-width 0.06s ease-out;
+	transition: stroke 0.06s ease-out;
+}
+
+div.tooltip {
+    position: fixed;
+    text-align: center;
+    width: 60px;
+    height: 25px;
+    padding: 2px;
+    font: 10px sans-serif;
+    background: white;
+	color: #565656;
+    border: 0px;
+    border-radius: 2px;
+    pointer-events: none;
+	box-shadow: 0 0px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+
+}
+
 </style>
 <body>
 <div id="metric-modal"></div>
@@ -484,6 +517,21 @@ focus.append("path")
     .attr("class", "line")
     .attr("d", line);
 
+// circles
+focus.selectAll(".dot")
+	.data(dataset_no_null)
+    .enter().append("circle")
+      .attr("class", "dot")
+      .attr("r", 3)
+      .attr("cx", function(d) { return x(d.month); })
+      .attr("cy", function(d) { return y(d.count); })
+	  .on("mouseover", function(d) {show_tooltip(d)} )
+      .on("mouseout", function(d) {hide_tooltip(d)} );
+
+/* === tooltip === */
+var div = d3.select("#metric-modal").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 
 /* === context chart === */
 
@@ -596,6 +644,32 @@ function customTickFunction(t0, t1, dt)  {
     return times;
 };
 
+// === tooltip functions === //
+
+// from: http://bl.ocks.org/d3noob/a22c42db65eb00d4e369
+function show_tooltip(d) {
+
+	if (d.count == 1) {
+		var metricName_point = metricName.slice(0, -1);
+	} else {
+		var metricName_point = metricName;
+	}
+
+    div.transition()
+		.duration(60)
+        .style("opacity", 0.98);
+    div.html("<b>" + DateFormat(d.month) + "</b><br/>"  + d.count + " " + metricName_point)
+        .style("left", (d3.event.pageX -30) + "px")//(d3.event.pageX) + "px"
+        .style("top", (d3.event.pageY -40) + "px");//(d3.event.pageY - 28) + "px"
+    };
+
+function hide_tooltip(d) {
+            div.transition()
+                .duration(60)
+                .style("opacity", 0);
+};
+
+
 // === brush and zoom functions ===
 
 function brushed() {
@@ -624,7 +698,10 @@ function common_behaviour() {
 	focus.select(".area_missing").attr("d", area_missing);
     focus.select(".line_missing").attr("d", line_missing);
 	focus.select(".x.axis").call(xAxis);
-}
+	focus.selectAll(".dot")
+		.attr("cx", function(d) { return x(d.month); })
+		.attr("cy", function(d) { return y(d.count); });
+};
 
 function brushend() {
 // when brush stops moving:
